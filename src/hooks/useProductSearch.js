@@ -1,41 +1,54 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
-// TODO: Exercice 3.1 - Créer le hook useDebounce
-// TODO: Exercice 3.2 - Créer le hook useLocalStorage
-
-const useProductSearch = () => {
-  const [products, setProducts] = useState([]);
+const useProductSearch = (searchTerm) => {
+  const [products, setProducts] = useState([]);            // tous les produits
+  const [filteredProducts, setFilteredProducts] = useState([]); // produits filtrés
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  // TODO: Exercice 4.2 - Ajouter l'état pour la pagination
 
+  // Appel API au chargement
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        // TODO: Exercice 4.2 - Modifier l'URL pour inclure les paramètres de pagination
-        const response = await fetch('https://api.daaif.net/products?delay=1000');
-        if (!response.ok) throw new Error('Erreur réseau');
-        const data = await response.json();
-        setProducts(data.products);
+    setLoading(true);
+    fetch('https://api.daaif.net/products')
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error('Erreur lors du chargement des produits');
+        }
+        return res.json();
+      })
+      .then((data) => {
+        console.log('Fetched data:', data); // <-- À garder pour vérifier
+        // 👉 Analyse de la structure
+        const productArray = Array.isArray(data)
+          ? data
+          : data.products || data.data || [];
+
+        setProducts(productArray);
+        setFilteredProducts(productArray);
         setLoading(false);
-      } catch (err) {
+      })
+      .catch((err) => {
         setError(err.message);
         setLoading(false);
-      }
-    };
+      });
+  }, []);
 
-    fetchProducts();
-  }, []); // TODO: Exercice 4.2 - Ajouter les dépendances pour la pagination
+  // 🔁 Filtrage quand searchTerm change
+  useEffect(() => {
+    if (!searchTerm) {
+      setFilteredProducts(products);
+    } else {
+      const filtered = products.filter((product) =>
+        product.title?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredProducts(filtered);
+    }
+  }, [searchTerm, products]);
 
-  // TODO: Exercice 4.1 - Ajouter la fonction de rechargement
-  // TODO: Exercice 4.2 - Ajouter les fonctions pour la pagination
-
-  return { 
-    products, 
-    loading, 
+  return {
+    products: filteredProducts,
+    loading,
     error,
-    // TODO: Exercice 4.1 - Retourner la fonction de rechargement
-    // TODO: Exercice 4.2 - Retourner les fonctions et états de pagination
   };
 };
 
