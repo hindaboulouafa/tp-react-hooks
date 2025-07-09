@@ -9,7 +9,11 @@ const ProductList = ({ searchTerm }) => {
     products,
     loading,
     error,
-  } = useProductSearch(searchTerm); // 🔥 Important : filtrage activé
+    fetchProducts,
+    nextPage,
+    prevPage,
+    currentPage,
+  } = useProductSearch(searchTerm);
 
   if (loading) {
     return (
@@ -19,7 +23,6 @@ const ProductList = ({ searchTerm }) => {
         </div>
       </div>
     );
-  
   }
 
   if (error) {
@@ -31,29 +34,41 @@ const ProductList = ({ searchTerm }) => {
   }
 
   return (
-    <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-      {products.map((product) => (
-        <div key={product.id} className="col">
-          <div className={`card h-100 ${isDarkTheme ? 'bg-dark text-light' : ''}`}>
-            {product.thumbnail && (
-              <img
-                src={product.thumbnail}
-                className="card-img-top"
-                alt={product.title}
-                style={{ height: '200px', objectFit: 'cover' }}
-              />
-            )}
-            <div className="card-body">
-              <h5 className="card-title">{product.title}</h5>
-              <p className="card-text">{product.description}</p>
-              <p className="card-text">
-                <strong>Prix : </strong>
-                {product.price} €
-              </p>
+    <div>
+      <div className="d-flex justify-content-between align-items-center my-3">
+        <button className="btn btn-secondary" onClick={prevPage}>← Précédent</button>
+        <span>Page {currentPage}</span>
+        <button className="btn btn-secondary" onClick={nextPage}>Suivant →</button>
+      </div>
+
+      <div className="text-center mb-4">
+        <button className="btn btn-primary" onClick={fetchProducts}>🔄 Recharger</button>
+      </div>
+
+      <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {products.map((product) => (
+          <div key={product.id} className="col">
+            <div className={`card h-100 ${isDarkTheme ? 'bg-dark text-light' : ''}`}>
+              {product.thumbnail && (
+                <img
+                  src={product.thumbnail}
+                  className="card-img-top"
+                  alt={product.title}
+                  style={{ height: '200px', objectFit: 'cover' }}
+                />
+              )}
+              <div className="card-body">
+                <h5 className="card-title">{product.title}</h5>
+                <p className="card-text">{product.description}</p>
+                <p className="card-text">
+                  <strong>Prix : </strong>
+                  {product.price} €
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 };
